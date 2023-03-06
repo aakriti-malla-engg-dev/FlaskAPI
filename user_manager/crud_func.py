@@ -33,7 +33,8 @@ def add_user_to_db():
 def get_user_from_db(mobile_no):
     user = collection_name.find_one({'mobile_no': mobile_no})
     if user:
-        return json_util.dumps(user)
+        for key, value in user.items():
+            return key, ':', value
     else:
         return 'User Not Found!'
 
