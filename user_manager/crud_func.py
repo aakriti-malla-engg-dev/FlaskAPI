@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from flask import Flask, jsonify, request
+import json
 
 from bson import json_util, ObjectId
 from user_func import Userschema, User
@@ -42,7 +43,15 @@ def get_users_from_db():
     users = []
     for doc in collection_name.find():
         users.append(json_util.dumps(doc))
-    return jsonify(users)
+
+    output = []
+    for my_dict in users:
+        dict_obj = json.loads(my_dict)
+        for key, value in dict_obj.items():
+            output.append(f"{key}: {value}")
+        output.append('')
+
+    return "<br>".join(output)
 
 
 @app.route('/users/<mobile_no>', methods=['PUT'])
