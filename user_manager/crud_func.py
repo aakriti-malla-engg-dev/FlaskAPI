@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from flask import Flask, jsonify, request
 import json
+from bson.json_util import dumps
 
 from bson import json_util, ObjectId
 from user_func import Userschema, User
@@ -14,30 +15,50 @@ collection_name = db["users"]
 app = Flask(__name__)
 
 
+@app.route('/')
+def menu():
+    return """============ Menu ============ 
+             <br>Add - /users [POST]
+             <br>Display a User - /users/<mobile_no> [GET]
+             <br>Display all Users - /users [GET]
+             <br>Update User - /users/<mobile_no> [PUT]
+             <br>Delete User - /users/<mobile_no> [DELETE]
+             <br>=============================="""
+
+
 @app.route('/users', methods=['POST'])
 def add_user_to_db():
-    users = request.get_json()
+    data = json.loads(request.data)
     inserted = []
     existing = []
-    for user in users:
-        if collection_name.find_one({"mobile_no": user['mobile_no']}):
-            existing.append(str(user['mobile_no']))
+    user_id = data['id']
+    user_name = data['name']
+    mobile_no = data['mobile_no']
+    city = data['city']
+    if id and user_name and mobile_no and city:
+        if collection_name.find_one({"mobile_no": data['mobile_no']}):
+            existing.append(str(data['mobile_no']))
         else:
-            collection_name.insert_one(user)
-            inserted.append(str(user['mobile_no']))
-    result = f"Inserted users: {', '.join(inserted)}\nExisting users: {', '.join(existing)}"
-    return result
+            status = collection_name.insert_one({
+                "id": user_id,
+                "name": user_name,
+                "mobile_no": mobile_no,
+                "city": city
+            })
+            inserted.append(str(data['mobile_no']))
+
+        result = f"Inserted users: {', '.join(inserted)}\nExisting users: {', '.join(existing)}"
+        return result
 
 
 @app.route('/users/<mobile_no>', methods=['GET'])
 def get_user_from_db(mobile_no):
     user = collection_name.find_one({'mobile_no': mobile_no})
     if user:
-        # return json_util.dumps(user)
         result = ''
         for key, val in user.items():
-            result += "{} : {}\n".format(key, val)
-        return f'<pre>{result}</pre>'
+            result += "{} : {}<br>".format(key, val)
+        return result
     else:
         return 'User Not Found!'
 
@@ -64,9 +85,9 @@ def update_user_in_db(mobile_no):
     user = collection_name.find_one({'mobile_no': mobile_no})
     if user:
         collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
-        return True
+        return dumps({'Message': 'SUCCESS'})
     else:
-        return False
+        return dumps({'Message': 'User not Found!'})
 
 
 @app.route('/users/<mobile_no>', methods=['DELETE'])
