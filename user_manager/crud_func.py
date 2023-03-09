@@ -1,5 +1,6 @@
+import bson
 from pymongo import MongoClient
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import json
 from bson.json_util import dumps
 
@@ -28,39 +29,61 @@ def menu():
 
 @app.route('/users', methods=['POST'])
 def add_user_to_db():
-    data = json.loads(request.data)
-    inserted = []
-    existing = []
-    user_id = data['id']
+    data = request.json
     user_name = data['name']
     mobile_no = data['mobile_no']
     city = data['city']
-    if id and user_name and mobile_no and city:
+    user_id = None
+    if user_name and mobile_no and city:
         if collection_name.find_one({"mobile_no": data['mobile_no']}):
-            existing.append(str(data['mobile_no']))
+            user = collection_name.find_one({"mobile_no": data['mobile_no']})
+            user_id = str(user['_id'])
+            return jsonify({
+                "status": 200,
+                "message": "User Already Exists!",
+                "id": user_id
+            })
         else:
             status = collection_name.insert_one({
-                "id": user_id,
                 "name": user_name,
                 "mobile_no": mobile_no,
                 "city": city
             })
-            inserted.append(str(data['mobile_no']))
-
-        result = f"Inserted users: {', '.join(inserted)}\nExisting users: {', '.join(existing)}"
-        return result
+            user_id = str(status.inserted_id)
+            return jsonify({
+                "status": 200,
+                "message": "User Created!",
+                "data": {
+                    "id": user_id
+                }
+            })
+    else:
+        return jsonify({
+            "status": 400,
+            "message": "Invalid Request Data"
+        })
 
 
 @app.route('/users/<mobile_no>', methods=['GET'])
 def get_user_from_db(mobile_no):
     user = collection_name.find_one({'mobile_no': mobile_no})
     if user:
-        result = ''
+        result = {}
         for key, val in user.items():
-            result += "{} : {}<br>".format(key, val)
-        return result
+            if isinstance(val, ObjectId):
+                result[key] = str(val)
+            else:
+                result[key] = val
+        return jsonify({
+            "status": 200,
+            'data': result,
+            'message': 'User Found!'
+        })
     else:
-        return 'User Not Found!'
+        return jsonify({
+            'status': 404,
+            'message': 'User not found!'
+        })
 
 
 @app.route('/users', methods=['GET'])
