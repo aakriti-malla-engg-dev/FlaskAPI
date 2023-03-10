@@ -51,7 +51,7 @@ def add_user_to_db():
             })
             user_id = str(status.inserted_id)
             return jsonify({
-                "status": 200,
+                "status": 201,
                 "message": "User Created!",
                 "data": {
                     "id": user_id
@@ -95,11 +95,13 @@ def get_users_from_db():
     output = []
     for my_dict in users:
         dict_obj = json.loads(my_dict)
-        for key, value in dict_obj.items():
-            output.append(f"{key}: {value}")
-        output.append('')
+        output.append(dict_obj)
 
-    return "<br>".join(output)
+    return jsonify({
+        "status": 200,
+        "data": output,
+        "message": "Users Found!"
+    })
 
 
 @app.route('/users/<mobile_no>', methods=['PUT'])
@@ -108,18 +110,31 @@ def update_user_in_db(mobile_no):
     user = collection_name.find_one({'mobile_no': mobile_no})
     if user:
         collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
-        return dumps({'Message': 'SUCCESS'})
+        return jsonify({
+            'Message': 'SUCCESS',
+            'status': 200
+        })
     else:
-        return dumps({'Message': 'User not Found!'})
+        return jsonify({
+            'status': 404,
+            'Message': 'User Not Found!'
+        })
 
 
 @app.route('/users/<mobile_no>', methods=['DELETE'])
 def delete_users_from_db(mobile_no):
     deleted = collection_name.delete_one({'mobile_no': mobile_no})
     if deleted.deleted_count == 1:
-        return 'User Deleted!'
+        return jsonify({
+            'status': 204,
+            'message': 'User Deleted!'
+        })
+
     else:
-        return 'User not Found!'
+        return jsonify({
+            'status': 404,
+            'message': 'User Not Found!'
+        })
 
 
 if __name__ == '__main__':
