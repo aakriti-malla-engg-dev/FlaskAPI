@@ -1,9 +1,13 @@
+import re
+
 import bson
 import pymongo
 from pymongo import MongoClient
 from flask import Flask, jsonify, request
 import json
 from bson.json_util import dumps
+import traceback
+import sys
 
 from bson import json_util, ObjectId
 
@@ -30,9 +34,40 @@ def menu():
 def add_user_to_db():
     try:
         data = request.json
+        fields = ['name', 'mobile_no', 'city']
+        cities = ['Delhi', 'Bengaluru', 'Mumbai', 'Kolkata']
+
+        missing_fields = []
+        for field in fields:
+            if field not in data:
+                missing_fields.append(field + ' is not present')
+        if len(missing_fields) > 0:
+            return jsonify({
+                'status': 404,
+                'message': missing_fields
+            })
+
         user_name = data['name']
         mobile_no = data['mobile_no']
         city = data['city']
+
+        if not re.match(r"^\d{10}$", mobile_no):
+            return jsonify({
+                "status": 400,
+                "message": "Invalid Mobile Number"
+            })
+        if city not in cities:
+            return jsonify({
+                'status': 400,
+                'message': 'The city must be from the following list: Delhi, Bengaluru, Kolkata, Mumbai'
+            })
+
+        if len(user_name) > 15:
+            return jsonify({
+                'status': 400,
+                'message': 'The name\'s length should not be more than 15!'
+            })
+
         if user_name and mobile_no and city:
             if collection_name.find_one({"mobile_no": data['mobile_no']}):
                 user = collection_name.find_one({"mobile_no": data['mobile_no']})
@@ -62,6 +97,7 @@ def add_user_to_db():
                 "message": "Invalid Request Data"
             })
     except Exception as e:
+        print(traceback.format_exc())
         return jsonify({
             'Error': str(e),
             'status': 404
@@ -94,6 +130,7 @@ def get_user_from_db(mobile_no):
     except pymongo.errors.OperationFailure as e:
         print(f"MongoDB operation failed with error: {e}")
     except Exception as e:
+
         return jsonify({
             'status': 500,
             'Message': 'Internal Server Error: ' + str(e)
