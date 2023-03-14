@@ -168,7 +168,6 @@ def get_users_from_db():
 @app.route('/users/<int:mobile_no>', methods=['PUT'])
 def update_user_in_db(mobile_no):
     updated_details = request.json
-    print(updated_details)
     cities = ['Delhi', 'Bengaluru', 'Mumbai', 'Kolkata']
     user = collection_name.find_one({'mobile_no': mobile_no})
     try:
@@ -189,14 +188,15 @@ def update_user_in_db(mobile_no):
                         'message': 'The city must be from the following list: Delhi, Bengaluru, Kolkata, Mumbai'
                     })
                 updated_details['city'] = city
-            if not re.match(r"^[6-9]\d{9}$", mobile_no):
-                return jsonify({
-                    "status": 400,
-                    "message": "Invalid Mobile Number"
-                })
-            updated_details['mobile_no'] = mobile_no
-            if updated_details:
-                collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
+
+            if 'mobile_no' in updated_details:
+                if not re.match(r"^[6-9]\d{9}$", updated_details['mobile_no']):
+                    return jsonify({
+                        "status": 400,
+                        "message": "Invalid Mobile Number"
+                    })
+
+            collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
             return jsonify({
                 'Message': 'SUCCESS',
                 'status': 200
