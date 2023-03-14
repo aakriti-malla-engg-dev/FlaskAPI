@@ -51,7 +51,7 @@ def add_user_to_db():
         mobile_no = data['mobile_no']
         city = data['city']
 
-        if not re.match(r"^\d{10}$", mobile_no):
+        if not re.match(r"^[6-9]\d{9}$", mobile_no):
             return jsonify({
                 "status": 400,
                 "message": "Invalid Mobile Number"
@@ -62,10 +62,10 @@ def add_user_to_db():
                 'message': 'The city must be from the following list: Delhi, Bengaluru, Kolkata, Mumbai'
             })
 
-        if len(user_name) > 15:
+        if not user_name.isalpha() or len(user_name) > 15:
             return jsonify({
                 'status': 400,
-                'message': 'The name\'s length should not be more than 15!'
+                'message': 'The name\'s length should not be more than 15 and can only contain alphabetical characters!'
             })
 
         if user_name and mobile_no and city:
@@ -165,13 +165,38 @@ def get_users_from_db():
         })
 
 
-@app.route('/users/<mobile_no>', methods=['PUT'])
+@app.route('/users/<int:mobile_no>', methods=['PUT'])
 def update_user_in_db(mobile_no):
-    updated_details = request.get_json()
+    updated_details = request.json
+    print(updated_details)
+    cities = ['Delhi', 'Bengaluru', 'Mumbai', 'Kolkata']
     user = collection_name.find_one({'mobile_no': mobile_no})
     try:
         if user:
-            collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
+            if 'name' in updated_details:
+                name = updated_details['name']
+                if not name.isalpha() or len(name) > 15:
+                    return jsonify({
+                        'status': 400,
+                        'message': 'The name\'s length should not be more than 15 and can only contain alphabetical characters!'
+                    })
+                updated_details['name'] = name
+            if 'city' in updated_details:
+                city = updated_details['city']
+                if city not in cities:
+                    return jsonify({
+                        'status': 400,
+                        'message': 'The city must be from the following list: Delhi, Bengaluru, Kolkata, Mumbai'
+                    })
+                updated_details['city'] = city
+            if not re.match(r"^[6-9]\d{9}$", mobile_no):
+                return jsonify({
+                    "status": 400,
+                    "message": "Invalid Mobile Number"
+                })
+            updated_details['mobile_no'] = mobile_no
+            if updated_details:
+                collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
             return jsonify({
                 'Message': 'SUCCESS',
                 'status': 200
