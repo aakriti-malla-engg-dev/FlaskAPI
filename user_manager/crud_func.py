@@ -239,13 +239,20 @@ def update_user_in_db(mobile_no):
 @app.route('/users/<int:mobile_no>', methods=['DELETE'])
 def delete_users_from_db(mobile_no):
     try:
-        deleted = collection_name.delete_one({'mobile_no': mobile_no})
-        if deleted.deleted_count == 1:
-            return jsonify({
-                'status': 204,
-                'message': 'User Deleted!'
-            })
-
+        user = collection_name.find_one({'mobile_no': mobile_no})
+        if user:
+            confirmation = request.args.get('confirm')
+            if confirmation == 'YES':
+                collection_name.delete_one({'mobile_no': mobile_no})
+                return jsonify({
+                    'status': 204,
+                    'message': 'User Deleted!'
+                })
+            else:
+                return jsonify({
+                    'status': 204,
+                    'message': 'Give Confirmation in order to delete!'
+                })
         else:
             return jsonify({
                 'status': 404,
