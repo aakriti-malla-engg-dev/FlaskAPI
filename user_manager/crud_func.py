@@ -177,7 +177,8 @@ def update_user_in_db(mobile_no):
                 if not name.isalpha() or len(name) > 15:
                     return jsonify({
                         'status': 400,
-                        'message': 'The name\'s length should not be more than 15 and can only contain alphabetical characters!'
+                        'message': 'Invalid Name - The name\'s length should not be more than 15 and can only contain '
+                                   'alphabetical characters!'
                     })
                 updated_details['name'] = name
             if 'city' in updated_details:
@@ -190,11 +191,27 @@ def update_user_in_db(mobile_no):
                 updated_details['city'] = city
 
             if 'mobile_no' in updated_details:
-                if not re.match(r"^[6-9]\d{9}$", updated_details['mobile_no']):
+                new_mobile_no = updated_details['mobile_no']
+                if not isinstance(mobile_no, int):
+                    try:
+                        new_mobile_no = int(new_mobile_no)
+                    except ValueError:
+                        return jsonify({
+                            "status": 400,
+                            "message": "Invalid Mobile Number"
+                        })
+
+                if not re.match(r"^[6-9]\d{9}$", str(new_mobile_no)):
                     return jsonify({
                         "status": 400,
                         "message": "Invalid Mobile Number"
                     })
+                if collection_name.find_one({'mobile_no': new_mobile_no, 'name': {'$ne': user['name']}}):
+                    return jsonify({
+                        'status': 400,
+                        'message': 'This mobile number is already registered by another user!'
+                    })
+                updated_details['mobile_no'] = mobile_no
 
             collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
             return jsonify({
@@ -202,6 +219,7 @@ def update_user_in_db(mobile_no):
                 'status': 200
             })
         else:
+            print(traceback.format_exc())
             return jsonify({
                 'status': 404,
                 'Message': 'User Not Found!'
@@ -211,6 +229,7 @@ def update_user_in_db(mobile_no):
     except pymongo.errors.OperationFailure as e:
         print(f"MongoDB operation failed with error: {e}")
     except Exception as e:
+        print(traceback.format_exc())
         return jsonify({
             'status': 500,
             'Message': 'Internal Server Error: ' + str(e)
