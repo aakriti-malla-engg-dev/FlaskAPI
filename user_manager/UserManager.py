@@ -51,6 +51,12 @@ def add_user_to_db():
         mobile_no = data['mobile_no']
         city = data['city']
 
+        if not re.search(r'^[a-zA-Z ]+$', user_name):
+            return jsonify({
+                'status': 400,
+                'message': 'Invalid Name!'
+            })
+
         if not re.match(r"^[6-9]\d{9}$", mobile_no):
             return jsonify({
                 "status": 400,
@@ -62,10 +68,10 @@ def add_user_to_db():
                 'message': 'The city must be from the following list: Delhi, Bengaluru, Kolkata, Mumbai'
             })
 
-        if not user_name.isalpha() or len(user_name) > 15:
+        if not re.search(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$', user_name) or len(user_name) > 15:
             return jsonify({
                 'status': 400,
-                'message': 'The name\'s length should not be more than 15 and can only contain alphabetical characters!'
+                'message': 'Invalid Name!'
             })
 
         if user_name and mobile_no and city:
