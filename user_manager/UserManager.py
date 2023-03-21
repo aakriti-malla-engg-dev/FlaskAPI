@@ -32,11 +32,13 @@ def menu():
 
 @app.route('/users', methods=['POST'])
 def add_user_to_db():
+    """ Function is used to add a new user to the database. """
     try:
         data = request.json
         fields = ['name', 'mobile_no', 'city']
         cities = ['Delhi', 'Bengaluru', 'Mumbai', 'Kolkata']
 
+        # check for missing fields
         missing_fields = []
         for field in fields:
             if field not in data:
@@ -47,31 +49,46 @@ def add_user_to_db():
                 'message': missing_fields
             })
 
+        valid_fields = set(fields)
+
+        # Check for invalid fields
+        invalid_fields = set(data.keys()) - valid_fields
+        if invalid_fields:
+            return jsonify({
+                'status': 400,
+                'message': f'Invalid field(s): {", ".join(invalid_fields)}'
+            })
+
         user_name = data['name']
         mobile_no = data['mobile_no']
         city = data['city']
 
-        if not re.search(r'^[a-zA-Z ]+$', user_name):
-            return jsonify({
-                'status': 400,
-                'message': 'Invalid Name!'
-            })
-
+        # mobile number format check
         if not re.match(r"^[6-9]\d{9}$", mobile_no):
             return jsonify({
                 "status": 400,
-                "message": "Invalid Mobile Number"
+                "message": "Invalid Mobile format or it should be of 10 digits!"
             })
+
+        # city check
         if city not in cities:
             return jsonify({
                 'status': 400,
                 'message': 'The city must be from the following list: Delhi, Bengaluru, Kolkata, Mumbai'
             })
 
-        if not re.search(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$', user_name) or len(user_name) > 15:
+        # Name format check
+        if not re.search(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$', user_name):
             return jsonify({
                 'status': 400,
                 'message': 'Invalid Name!'
+            })
+
+        # Name length check
+        if len(user_name) > 15:
+            return jsonify({
+                'status': 400,
+                'message': 'Name length more than 15 characters!'
             })
 
         if user_name and mobile_no and city:
@@ -91,7 +108,7 @@ def add_user_to_db():
                 })
                 user_id = str(status.inserted_id)
                 return jsonify({
-                    "status": 201,
+                    "status": 200,
                     "message": "User Created!",
                     "data": {
                         "id": user_id
@@ -100,7 +117,7 @@ def add_user_to_db():
         else:
             return jsonify({
                 "status": 400,
-                "message": "Invalid Request Data"
+                "message": "Invalid Request!"
             })
     except Exception as e:
         print(traceback.format_exc())
@@ -112,6 +129,7 @@ def add_user_to_db():
 
 @app.route('/users/<mobile_no>', methods=['GET'])
 def get_user_from_db(mobile_no):
+    """ Function to get user from the database. """
     try:
         user = collection_name.find_one({'mobile_no': mobile_no})
         if user:
@@ -145,6 +163,7 @@ def get_user_from_db(mobile_no):
 
 @app.route('/users', methods=['GET'])
 def get_users_from_db():
+    """ Function to get all users from the database. """
     try:
         users = []
         for doc in collection_name.find():
@@ -173,6 +192,7 @@ def get_users_from_db():
 
 @app.route('/users/<int:mobile_no>', methods=['PUT'])
 def update_user_in_db(mobile_no):
+    """ Function to update user info in the database. """
     updated_details = request.json
     cities = ['Delhi', 'Bengaluru', 'Mumbai', 'Kolkata']
     user = collection_name.find_one({'mobile_no': mobile_no})
@@ -244,6 +264,7 @@ def update_user_in_db(mobile_no):
 
 @app.route('/users/<int:mobile_no>', methods=['DELETE'])
 def delete_users_from_db(mobile_no):
+    """ Function to delete user from the database. """
     try:
         user = collection_name.find_one({'mobile_no': mobile_no})
         if user:
