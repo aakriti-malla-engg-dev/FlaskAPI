@@ -143,3 +143,5 @@ def test_add_user_invalid_request():
     data = response.json()
     assert data['status'] == 400
     assert data['message'] == 'Invalid field(s): so'
+
+

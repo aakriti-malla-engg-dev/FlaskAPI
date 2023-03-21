@@ -150,7 +150,10 @@ def get_user_from_db(mobile_no):
                 'message': 'User not found!'
             })
     except pymongo.errors.ConnectionFailure:
-        print("Connection Error!")
+        return jsonify({
+            'status': 500,
+            'message': 'Connection Error!'
+        })
     except pymongo.errors.OperationFailure as e:
         print(f"MongoDB operation failed with error: {e}")
     except Exception as e:
@@ -200,11 +203,16 @@ def update_user_in_db(mobile_no):
         if user:
             if 'name' in updated_details:
                 name = updated_details['name']
-                if not name.isalpha() or len(name) > 15:
+                if len(name) > 15:
                     return jsonify({
                         'status': 400,
-                        'message': 'Invalid Name - The name\'s length should not be more than 15 and can only contain '
-                                   'alphabetical characters!'
+                        'message': 'The name\'s length should not be more than 15'
+                    })
+                # Name format check
+                if not re.search(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$', name):
+                    return jsonify({
+                        'status': 400,
+                        'message': 'Invalid Name!'
                     })
                 updated_details['name'] = name
             if 'city' in updated_details:
@@ -232,6 +240,7 @@ def update_user_in_db(mobile_no):
                         "status": 400,
                         "message": "Invalid Mobile Number"
                     })
+
                 if collection_name.find_one({'mobile_no': new_mobile_no, 'name': {'$ne': user['name']}}):
                     return jsonify({
                         'status': 400,
@@ -241,14 +250,14 @@ def update_user_in_db(mobile_no):
 
             collection_name.update_one({"mobile_no": mobile_no}, {"$set": updated_details})
             return jsonify({
-                'Message': 'SUCCESS',
+                'message': 'SUCCESS',
                 'status': 200
             })
         else:
             print(traceback.format_exc())
             return jsonify({
                 'status': 404,
-                'Message': 'User Not Found!'
+                'message': 'User Not Found!'
             })
     except pymongo.errors.ConnectionFailure:
         print("Connection Error!")
