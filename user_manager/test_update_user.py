@@ -7,7 +7,7 @@ def test_update_user():
     user_data = {
         'name': 'Diana'
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     print(response.text)
     data = response.json()
@@ -30,7 +30,7 @@ def test_update_user_incorrect_name():
     user_data = {
         'name': ' Diana '
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     data = response.json()
     assert data['status'] == 400
@@ -41,7 +41,7 @@ def test_update_user_name_len_more_than_15():
     user_data = {
         'name': 'Diana vivians solaris'
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     data = response.json()
     assert data['status'] == 400
@@ -52,7 +52,7 @@ def test_update_user_wrong_city():
     user_data = {
         'city': 'Pune'
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     data = response.json()
     assert data['status'] == 400
@@ -63,7 +63,7 @@ def test_update_user_wrong_mobile_no_format():
     user_data = {
         'mobile_no': 2398989898
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     data = response.json()
     assert data['status'] == 400
@@ -74,7 +74,7 @@ def test_update_user_with_mobile_matching_with_other():
     user_data = {
         'mobile_no': 9090909090
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     data = response.json()
     assert data['status'] == 400
@@ -85,7 +85,7 @@ def test_update_user_incorrect_mobile_length():
     user_data = {
         'mobile_no': 939898989810
     }
-    mobile_no = '/7989797979'
+    mobile_no = '/9696950090'
     response = requests.put(URL + mobile_no, json=user_data)
     data = response.json()
     assert data['status'] == 400

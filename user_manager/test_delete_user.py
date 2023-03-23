@@ -4,7 +4,7 @@ URL = "http://localhost:5000/users"
 
 
 def test_delete_user_with_yes_param():
-    mobile_no = '/7989797979'
+    mobile_no = '/9656565652'
     response = requests.delete(URL+mobile_no+'?confirm=YES')
     data = response.json()
     assert data['status'] == 204

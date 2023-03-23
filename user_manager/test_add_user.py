@@ -11,7 +11,7 @@ URL = "http://localhost:5000/users"
 def test_add_user():
     user_data = {
         'name': 'Happy Kia',
-        'mobile_no': '9656565652',
+        'mobile_no': 9656565652,
         'city': 'Bengaluru'
     }
 
@@ -21,12 +21,21 @@ def test_add_user():
     assert data['status'] == 200
     assert data['message'] == "User Created!"
 
+    user_id = data['data']['id']
+
+    user_from_db = collection_name.find_one({"_id": ObjectId(user_id)})
+    assert user_from_db is not None
+
+    assert user_from_db['name'] == user_data['name']
+    assert user_from_db['mobile_no'] == user_data['mobile_no']
+    assert user_from_db['city'] == user_data['city']
+
 
 def test_add_user_already_exist():
     user_data = {
-        'name': 'Pia',
-        'mobile_no': '9079890192',
-        'city': 'Delhi'
+        'name': 'sia',
+        'mobile_no': 9191919191,
+        'city': 'Bengaluru'
     }
     response = requests.post(URL, json=user_data)
     assert response.status_code == 200
@@ -35,7 +44,7 @@ def test_add_user_already_exist():
     assert data['status'] == 200
     assert data['message'] == 'User Already Exists!'
     assert 'id' in data
-    assert str(collection_name.find_one({'mobile_no': '9079890192'})['_id']) == data['id']
+    assert str(collection_name.find_one({'mobile_no': 9191919191})['_id']) == data['id']
 
 
 def test_add_user_name_with_space_at_beg_and_end():

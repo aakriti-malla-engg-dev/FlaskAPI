@@ -60,11 +60,11 @@ def add_user_to_db():
             })
 
         user_name = data['name']
-        mobile_no = data['mobile_no']
+        mobile_no = int(data['mobile_no'])
         city = data['city']
 
         # mobile number format check
-        if not re.match(r"^[6-9]\d{9}$", mobile_no):
+        if not re.match(r"^[6-9]\d{9}$", str(mobile_no)):
             return jsonify({
                 "status": 400,
                 "message": "Invalid Mobile format or it should be of 10 digits!"
@@ -103,7 +103,7 @@ def add_user_to_db():
             else:
                 status = collection_name.insert_one({
                     "name": user_name,
-                    "mobile_no": mobile_no,
+                    "mobile_no": int(mobile_no),
                     "city": city
                 })
                 user_id = str(status.inserted_id)

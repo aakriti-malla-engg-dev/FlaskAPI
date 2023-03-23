@@ -14,15 +14,8 @@ def test_get_users():
 
 
 def test_get_users_failure():
-    response = requests.get('/users')
+    response = requests.get(URL)
     assert response.status_code == 200
     data = response.json()
     assert len(data['data']) == 0
 
-
-# def test_connection_error():
-#     response = requests.get(URL)
-#     print(response.text)
-#     data = response.json()
-#     assert data['status'] == 500
-#     assert data['message'] == 'Connection Error!'
