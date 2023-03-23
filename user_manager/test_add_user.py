@@ -50,7 +50,7 @@ def test_add_user_already_exist():
 def test_add_user_name_with_space_at_beg_and_end():
     user_data = {
         'name': ' Chia ',
-        'mobile_no': '7989797979',
+        'mobile_no': 7989797979,
         'city': 'Delhi'
     }
     response = requests.post(URL, json=user_data)
@@ -62,7 +62,7 @@ def test_add_user_name_with_space_at_beg_and_end():
 def test_add_user_name_with_length_more_than_15_char():
     user_data = {
         'name': 'Lilly solaris vivians',
-        'mobile_no': '9079890192',
+        'mobile_no': 9079890192,
         'city': 'Delhi'
     }
     response = requests.post(URL, json=user_data)
@@ -74,7 +74,7 @@ def test_add_user_name_with_length_more_than_15_char():
 def test_add_user_empty_name():
     user_data = {
         'name': '',
-        'mobile_no': '9079890192',
+        'mobile_no': 9079890192,
         'city': 'Delhi'
     }
     response = requests.post(URL, json=user_data)
@@ -86,7 +86,7 @@ def test_add_user_empty_name():
 def test_add_user_invalid_name():
     user_data = {
         'name': 'samy10',
-        'mobile_no': '9079890192',
+        'mobile_no': 9079890192,
         'city': 'Delhi'
     }
     response = requests.post(URL, json=user_data)
@@ -98,7 +98,7 @@ def test_add_user_invalid_name():
 def test_add_user_with_invalid_mobile_no():
     user_data = {
         'name': 'Chia',
-        'mobile_no': '2989797979',
+        'mobile_no': 2989797979,
         'city': 'Delhi'
     }
     response = requests.post(URL, json=user_data)
@@ -110,7 +110,7 @@ def test_add_user_with_invalid_mobile_no():
 def test_add_user_with_invalid_length_mobile_no():
     user_data = {
         'name': 'Chia',
-        'mobile_no': '79897979790',
+        'mobile_no': 79897979790,
         'city': 'Delhi'
     }
     response = requests.post(URL, json=user_data)
@@ -122,7 +122,7 @@ def test_add_user_with_invalid_length_mobile_no():
 def test_add_user_wrong_city():
     user_data = {
         'name': 'Diana',
-        'mobile_no': '9989797979',
+        'mobile_no': 9989797979,
         'city': 'Pune'
     }
     response = requests.post(URL, json=user_data)
@@ -144,7 +144,7 @@ def test_add_user_missing_field():
 def test_add_user_invalid_request():
     user_data = {
         'name': 'Diana',
-        'mobile_no': '9989797979',
+        'mobile_no': 9989797979,
         'city': 'Delhi',
         'so': 'check'
     }
